@@ -126,6 +126,14 @@ export function Desktop(): React.JSX.Element {
       }
     },
     onDragEnd: (dx, dy, clientX, clientY) => {
+      // Resolve the drop target BEFORE restoring pointer-events: elementFromPoint
+      // must still see through the dragged icon(s) to whatever's actually
+      // underneath, otherwise (since the icon follows the cursor) it resolves
+      // to itself — and if the dragged icon is a folder, that reads as "drop
+      // into itself," which the move-cycle guard silently no-ops, so the new
+      // position is never even saved via setIconPosition.
+      const target = dx === 0 && dy === 0 ? null : resolveDropTarget(clientX, clientY);
+
       for (const memberId of dragMoveSet.current) {
         const node = iconNodeRefs.current.get(memberId);
         if (node !== undefined) node.style.pointerEvents = '';
@@ -144,7 +152,6 @@ export function Desktop(): React.JSX.Element {
         return;
       }
 
-      const target = resolveDropTarget(clientX, clientY);
       for (const memberId of dragMoveSet.current) {
         const base = dragBase.current.get(memberId);
         if (base === undefined) continue;
