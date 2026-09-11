@@ -1,13 +1,26 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useWindowStore } from './stores/windowStore';
+import { useDesktopStore } from './stores/desktopStore';
 import { APP_REGISTRY } from './apps/APP_REGISTRY';
 import { initPersistence } from './persistence/persist';
+import { BootScreen } from './boot/BootScreen/BootScreen';
 import { Desktop } from './desktop/Desktop/Desktop';
 import { WindowManager } from './window-manager/WindowManager/WindowManager';
 import { Taskbar } from './taskbar/Taskbar/Taskbar';
 import styles from './App.module.css';
 
+const BOOT_DURATION_MS = 1400;
+
 export function App(): React.JSX.Element {
+  const wallpaper = useDesktopStore((state) => state.wallpaper);
+  const [booting, setBooting] = useState(true);
+
+  useEffect(() => {
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const timer = setTimeout(() => setBooting(false), reduceMotion ? 0 : BOOT_DURATION_MS);
+    return () => clearTimeout(timer);
+  }, []);
+
   useEffect(() => {
     // Symmetric cleanup matters here: StrictMode mounts effects twice in dev
     // (mount -> cleanup -> mount) specifically to catch non-idempotent setup
@@ -30,10 +43,11 @@ export function App(): React.JSX.Element {
   }, []);
 
   return (
-    <div className={styles.desktop} data-testid="desktop">
+    <div className={styles.desktop} data-testid="desktop" style={{ backgroundColor: wallpaper }}>
       <Desktop />
       <WindowManager />
       <Taskbar />
+      {booting && <BootScreen onDismiss={() => setBooting(false)} />}
     </div>
   );
 }

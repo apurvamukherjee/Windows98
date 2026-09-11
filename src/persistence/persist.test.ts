@@ -2,14 +2,16 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { initPersistence, loadPersistedState, saveSnapshot, STORAGE_KEY } from './persist';
 import { useFSStore, DOCUMENTS_ID, seedFolders } from '../stores/fsStore';
 import { useWindowStore } from '../stores/windowStore';
-import { useDesktopStore } from '../stores/desktopStore';
+import { useDesktopStore, DEFAULT_WALLPAPER } from '../stores/desktopStore';
 import { useAppInstanceStore } from '../stores/appInstanceStore';
+import { useTaskbarStore } from '../stores/taskbarStore';
 
 function resetAllStores(): void {
   useFSStore.setState({ nodes: seedFolders(), nextNodeSeq: 0 });
   useWindowStore.setState({ windows: {}, zOrder: [], nextWindowSeq: 0 });
-  useDesktopStore.setState({ iconPositions: {} });
+  useDesktopStore.setState({ iconPositions: {}, wallpaper: DEFAULT_WALLPAPER });
   useAppInstanceStore.setState({ byWindowId: {} });
+  useTaskbarStore.setState({ pinnedAppIds: [] });
 }
 
 beforeEach(() => {
@@ -28,6 +30,8 @@ describe('save/load round trip', () => {
     const windowId = useWindowStore.getState().openWindow('notepad', { w: 380, h: 260 });
     useAppInstanceStore.getState().patchInstanceState(windowId, { fileId, content: 'hi' });
     useDesktopStore.getState().setIconPosition(fileId, 80, 90);
+    useDesktopStore.getState().setWallpaper('#800080');
+    useTaskbarStore.getState().pinApp('notepad');
 
     saveSnapshot();
     resetAllStores();
@@ -37,7 +41,9 @@ describe('save/load round trip', () => {
     expect(useFSStore.getState().nodes[fileId]).toMatchObject({ name: 'a.txt', content: 'hi' });
     expect(useWindowStore.getState().windows[windowId]).toMatchObject({ appId: 'notepad' });
     expect(useDesktopStore.getState().iconPositions[fileId]).toEqual({ x: 80, y: 90 });
+    expect(useDesktopStore.getState().wallpaper).toBe('#800080');
     expect(useAppInstanceStore.getState().byWindowId[windowId]).toMatchObject({ fileId, content: 'hi' });
+    expect(useTaskbarStore.getState().pinnedAppIds).toEqual(['notepad']);
   });
 
   test('restores id counters, so new ids never collide with restored ones', () => {
@@ -64,12 +70,15 @@ describe('loadPersistedState failure modes', () => {
   });
 
   test('returns false on a schema version mismatch', () => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ schemaVersion: 999, fs: {}, windows: {}, desktop: {}, appInstances: {} }));
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({ schemaVersion: 999, fs: {}, windows: {}, desktop: {}, appInstances: {}, taskbar: {} }),
+    );
     expect(loadPersistedState()).toBe(false);
   });
 
   test('returns false when the envelope is missing required sections', () => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ schemaVersion: 1, fs: {} }));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ schemaVersion: 2, fs: {} }));
     expect(loadPersistedState()).toBe(false);
   });
 });

@@ -148,4 +148,13 @@ describe('context menu', () => {
 
     expect(useFSStore.getState().nodes[id]).toMatchObject({ parentId: RECYCLE_BIN_ID });
   });
+
+  test('the background menu offers wallpaper presets that update the desktop store', () => {
+    const { container } = render(<Desktop />);
+    fireEvent.contextMenu(container.firstChild as Element, { clientX: 50, clientY: 50 });
+
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Wallpaper: Navy' }));
+
+    expect(useDesktopStore.getState().wallpaper).toBe('#000080');
+  });
 });

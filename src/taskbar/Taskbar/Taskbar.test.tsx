@@ -2,6 +2,7 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, test } from 'vitest';
 import { Taskbar } from './Taskbar';
 import { useWindowStore, type WindowState } from '../../stores/windowStore';
+import { useTaskbarStore } from '../../stores/taskbarStore';
 
 function seed(id: string, overrides: Partial<WindowState> = {}): WindowState {
   return {
@@ -25,6 +26,7 @@ beforeEach(() => {
     zOrder: ['a', 'b'],
     nextWindowSeq: 0,
   });
+  useTaskbarStore.setState({ pinnedAppIds: [] });
 });
 
 describe('Taskbar', () => {
@@ -89,5 +91,41 @@ describe('Start menu', () => {
 
     fireEvent.pointerDown(document.body);
     expect(screen.queryByRole('menu')).not.toBeInTheDocument();
+  });
+});
+
+describe('pinning', () => {
+  test('right-clicking a running window button offers Pin to Taskbar', () => {
+    render(<Taskbar />);
+    fireEvent.contextMenu(screen.getByText('a'));
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Pin to Taskbar' }));
+
+    expect(useTaskbarStore.getState().pinnedAppIds).toEqual(['a']);
+  });
+
+  test('a pinned app with no running window shows a launcher button; launching it opens a window', () => {
+    useTaskbarStore.getState().pinApp('notepad');
+    render(<Taskbar />);
+
+    expect(screen.getByText(/Notepad/)).toBeInTheDocument();
+    fireEvent.click(screen.getByText(/Notepad/));
+
+    const state = useWindowStore.getState();
+    expect(state.windows[state.zOrder.at(-1) ?? '']).toMatchObject({ appId: 'notepad' });
+  });
+
+  test('a pinned app that is already running does not get a duplicate launcher button', () => {
+    useTaskbarStore.getState().pinApp('a');
+    render(<Taskbar />);
+    expect(screen.getAllByText('a')).toHaveLength(1);
+  });
+
+  test('unpinning removes the launcher button', () => {
+    useTaskbarStore.getState().pinApp('notepad');
+    render(<Taskbar />);
+    fireEvent.contextMenu(screen.getByText(/Notepad/));
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Unpin from Taskbar' }));
+
+    expect(screen.queryByText(/Notepad/)).not.toBeInTheDocument();
   });
 });

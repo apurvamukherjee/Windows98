@@ -29,3 +29,10 @@ if (typeof window.matchMedia !== 'function') {
 if (typeof document.elementFromPoint !== 'function') {
   document.elementFromPoint = () => null;
 }
+
+// jsdom does no layout, so scrollTo/scrollHeight-driven scrolling is also
+// unimplemented on Element. Components that auto-scroll (e.g. Terminal's
+// scrollback) just need this to exist and not throw.
+if (typeof Element.prototype.scrollTo !== 'function') {
+  Element.prototype.scrollTo = () => {};
+}

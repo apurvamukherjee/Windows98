@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, test } from 'vitest';
 import { openFile } from './openFile';
 import { useWindowStore } from '../stores/windowStore';
 import { useAppInstanceStore } from '../stores/appInstanceStore';
-import type { FileNode } from '../fs/fsTypes';
+import type { FileNode, FileType } from '../fs/fsTypes';
 
 beforeEach(() => {
   useWindowStore.setState({ windows: {}, zOrder: [], nextWindowSeq: 0 });
@@ -37,8 +37,17 @@ describe('openFile', () => {
     });
   });
 
-  test('does nothing for a file type with no registered app', () => {
+  test('opens a window for the other registered app (image -> Paint)', () => {
     openFile(textFile({ fileType: 'image' }));
+    const state = useWindowStore.getState();
+    expect(state.windows[state.zOrder.at(-1) ?? '']).toMatchObject({ appId: 'paint' });
+  });
+
+  test('does nothing for a file type with no registered app', () => {
+    // Every current FileType has a registered app; this exercises the
+    // defensive "no match" path for a hypothetical future type that hasn't
+    // shipped an app yet.
+    openFile(textFile({ fileType: 'unknown-future-type' as unknown as FileType }));
     expect(useWindowStore.getState().zOrder).toEqual([]);
   });
 });

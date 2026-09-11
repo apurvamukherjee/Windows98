@@ -1,5 +1,9 @@
 import { Notepad } from './notepad/Notepad';
 import { Explorer } from './explorer/Explorer';
+import { Paint } from './paint/Paint';
+import { Terminal } from './terminal/Terminal';
+import { Minesweeper } from './minesweeper/Minesweeper';
+import { Solitaire } from './solitaire/Solitaire';
 import type { FileType } from '../fs/fsTypes';
 
 export interface AppComponentProps {
@@ -31,6 +35,35 @@ export const APP_REGISTRY: Record<string, AppDefinition> = {
     icon: '🖥️',
     component: Explorer,
     defaultSize: { w: 480, h: 340 },
+  },
+  paint: {
+    id: 'paint',
+    title: 'Paint',
+    icon: '🎨',
+    component: Paint,
+    defaultSize: { w: 420, h: 340 },
+    supportedFileTypes: ['image'],
+  },
+  terminal: {
+    id: 'terminal',
+    title: 'Terminal',
+    icon: '💻',
+    component: Terminal,
+    defaultSize: { w: 480, h: 320 },
+  },
+  minesweeper: {
+    id: 'minesweeper',
+    title: 'Minesweeper',
+    icon: '💣',
+    component: Minesweeper,
+    defaultSize: { w: 250, h: 320 },
+  },
+  solitaire: {
+    id: 'solitaire',
+    title: 'Solitaire',
+    icon: '🃏',
+    component: Solitaire,
+    defaultSize: { w: 420, h: 460 },
   },
 };
 

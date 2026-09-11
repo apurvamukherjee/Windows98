@@ -2,18 +2,20 @@ import { useFSStore } from '../stores/fsStore';
 import { useWindowStore } from '../stores/windowStore';
 import { useDesktopStore } from '../stores/desktopStore';
 import { useAppInstanceStore } from '../stores/appInstanceStore';
+import { useTaskbarStore } from '../stores/taskbarStore';
 import type { FSNode } from '../fs/fsTypes';
 import type { WindowState } from '../stores/windowStore';
 
 export const STORAGE_KEY = 'win98:v1:state';
-export const SCHEMA_VERSION = 1;
+export const SCHEMA_VERSION = 2;
 
 interface PersistedEnvelope {
   schemaVersion: number;
   fs: { nodes: Record<string, FSNode>; nextNodeSeq: number };
   windows: { windows: Record<string, WindowState>; zOrder: string[]; nextWindowSeq: number };
-  desktop: { iconPositions: Record<string, { x: number; y: number }> };
+  desktop: { iconPositions: Record<string, { x: number; y: number }>; wallpaper: string };
   appInstances: { byWindowId: Record<string, Record<string, unknown>> };
+  taskbar: { pinnedAppIds: string[] };
 }
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {
@@ -28,7 +30,13 @@ function isPlainObject(value: unknown): value is Record<string, unknown> {
 function isValidEnvelope(value: unknown): value is PersistedEnvelope {
   if (!isPlainObject(value)) return false;
   if (value.schemaVersion !== SCHEMA_VERSION) return false;
-  return isPlainObject(value.fs) && isPlainObject(value.windows) && isPlainObject(value.desktop) && isPlainObject(value.appInstances);
+  return (
+    isPlainObject(value.fs) &&
+    isPlainObject(value.windows) &&
+    isPlainObject(value.desktop) &&
+    isPlainObject(value.appInstances) &&
+    isPlainObject(value.taskbar)
+  );
 }
 
 function buildSnapshot(): PersistedEnvelope {
@@ -36,12 +44,14 @@ function buildSnapshot(): PersistedEnvelope {
   const windows = useWindowStore.getState();
   const desktop = useDesktopStore.getState();
   const appInstances = useAppInstanceStore.getState();
+  const taskbar = useTaskbarStore.getState();
   return {
     schemaVersion: SCHEMA_VERSION,
     fs: { nodes: fs.nodes, nextNodeSeq: fs.nextNodeSeq },
     windows: { windows: windows.windows, zOrder: windows.zOrder, nextWindowSeq: windows.nextWindowSeq },
-    desktop: { iconPositions: desktop.iconPositions },
+    desktop: { iconPositions: desktop.iconPositions, wallpaper: desktop.wallpaper },
     appInstances: { byWindowId: appInstances.byWindowId },
+    taskbar: { pinnedAppIds: taskbar.pinnedAppIds },
   };
 }
 
@@ -91,6 +101,7 @@ export function loadPersistedState(): boolean {
   useWindowStore.setState(parsed.windows);
   useDesktopStore.setState(parsed.desktop);
   useAppInstanceStore.setState(parsed.appInstances);
+  useTaskbarStore.setState(parsed.taskbar);
   return true;
 }
 
@@ -116,6 +127,7 @@ export function initPersistence(): { restored: boolean; cleanup: () => void } {
     useWindowStore.subscribe(scheduleSave),
     useDesktopStore.subscribe(scheduleSave),
     useAppInstanceStore.subscribe(scheduleSave),
+    useTaskbarStore.subscribe(scheduleSave),
   ];
 
   const flush = (): void => {

@@ -12,10 +12,22 @@
     inset 1px 1px 0 var(--win98-highlight),
     inset -1px -1px 0 var(--win98-shadow);
   will-change: transform;
+  transition:
+    transform 150ms ease-out,
+    width 150ms ease-out,
+    height 150ms ease-out,
+    opacity 150ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .window {
+    transition: none;
+  }
 }
 
 .titlebar {
   flex: none;
+  z-index: 2;
   height: 20px;
   display: flex;
   align-items: center;
@@ -63,13 +75,26 @@
 
 .content {
   flex: 1;
+  z-index: 0;
   margin: 2px;
   background: #ffffff;
   overflow: auto;
 }
 
+/*
+ * Explicit z-index throughout this file (rather than relying on DOM order)
+ * is what makes both of these true at once, regardless of source order:
+ * - a handle stays grabbable even where its hit area overlaps the content
+ *   pane at the window's inner edge (handle above content);
+ * - the titlebar's minimize/maximize/close buttons stay clickable even
+ *   where a corner handle's hit area overlaps the titlebar (titlebar above
+ *   handle). This is exactly the bug that made resizing silently do nothing
+ *   in real browsers — content painted on top of the resize handles, and
+ *   no unit test caught it because jsdom doesn't do real hit-testing.
+ */
 .handle {
   position: absolute;
+  z-index: 1;
   touch-action: none;
 }
 

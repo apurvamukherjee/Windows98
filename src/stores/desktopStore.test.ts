@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, test } from 'vitest';
-import { useDesktopStore } from './desktopStore';
+import { DEFAULT_WALLPAPER, useDesktopStore } from './desktopStore';
 
 beforeEach(() => {
-  useDesktopStore.setState({ iconPositions: {} });
+  useDesktopStore.setState({ iconPositions: {}, wallpaper: DEFAULT_WALLPAPER });
 });
 
 describe('setIconPosition', () => {
@@ -16,5 +16,12 @@ describe('setIconPosition', () => {
     const before = useDesktopStore.getState().iconPositions.a;
     useDesktopStore.getState().setIconPosition('b', 80, 0);
     expect(useDesktopStore.getState().iconPositions.a).toBe(before);
+  });
+});
+
+describe('setWallpaper', () => {
+  test('updates the wallpaper color', () => {
+    useDesktopStore.getState().setWallpaper('#800080');
+    expect(useDesktopStore.getState().wallpaper).toBe('#800080');
   });
 });

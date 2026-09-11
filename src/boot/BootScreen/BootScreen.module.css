@@ -1,0 +1,61 @@
+.screen {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  background: #000000;
+  color: #ffffff;
+  font-family: 'Courier New', monospace;
+  cursor: default;
+}
+
+.wordmark {
+  font-size: 32px;
+  font-weight: bold;
+  letter-spacing: 2px;
+  color: #ffffff;
+}
+
+.subtitle {
+  font-size: 13px;
+  color: #c0c0c0;
+}
+
+.barTrack {
+  width: 220px;
+  height: 14px;
+  border: 1px solid #808080;
+  padding: 2px;
+}
+
+.barFill {
+  height: 100%;
+  width: 40%;
+  background: repeating-linear-gradient(90deg, #0000ff 0 8px, #000080 8px 10px);
+  animation: sweep 1.1s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .barFill {
+    animation: none;
+    width: 100%;
+  }
+}
+
+@keyframes sweep {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(250%);
+  }
+}
+
+.hint {
+  font-size: 11px;
+  color: #808080;
+}

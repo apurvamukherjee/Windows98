@@ -98,6 +98,53 @@ describe('focus', () => {
   });
 });
 
+describe('cycleFocus', () => {
+  beforeEach(() => {
+    useWindowStore.setState({
+      windows: { a: seedWindow('a'), b: seedWindow('b'), c: seedWindow('c') },
+      zOrder: ['a', 'b', 'c'],
+    });
+  });
+
+  test('direction -1 rotates the previous top to the front, shifting the others back', () => {
+    useWindowStore.getState().cycleFocus(-1);
+    expect(useWindowStore.getState().zOrder).toEqual(['c', 'a', 'b']);
+  });
+
+  test('direction 1 is the exact inverse rotation', () => {
+    useWindowStore.getState().cycleFocus(-1);
+    useWindowStore.getState().cycleFocus(1);
+    expect(useWindowStore.getState().zOrder).toEqual(['a', 'b', 'c']);
+  });
+
+  test('direction 1 alone cycles the other way', () => {
+    useWindowStore.getState().cycleFocus(1);
+    expect(useWindowStore.getState().zOrder).toEqual(['b', 'c', 'a']);
+  });
+
+  test('repeated calls cycle through every window and back', () => {
+    useWindowStore.getState().cycleFocus(-1);
+    useWindowStore.getState().cycleFocus(-1);
+    useWindowStore.getState().cycleFocus(-1);
+    expect(useWindowStore.getState().zOrder).toEqual(['a', 'b', 'c']);
+  });
+
+  test('skips minimized windows', () => {
+    useWindowStore.getState().minimize('b');
+    useWindowStore.getState().cycleFocus(-1);
+    // only 'a' and 'c' are visible; cycling brings 'a' to the front.
+    expect(useWindowStore.getState().zOrder.at(-1)).toBe('a');
+  });
+
+  test('is a no-op with zero or one visible windows', () => {
+    useWindowStore.getState().minimize('a');
+    useWindowStore.getState().minimize('b');
+    const before = useWindowStore.getState();
+    useWindowStore.getState().cycleFocus(-1);
+    expect(useWindowStore.getState()).toBe(before);
+  });
+});
+
 describe('minimize / restoreFromMinimized', () => {
   test('minimize sets the flag and restoreFromMinimized clears it', () => {
     useWindowStore.getState().minimize('a');

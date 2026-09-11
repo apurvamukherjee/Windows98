@@ -27,6 +27,7 @@ interface WindowStoreState {
   moveWindow: (id: string, x: number, y: number) => void;
   resizeWindow: (id: string, rect: Rect) => void;
   focus: (id: string) => void;
+  cycleFocus: (direction: 1 | -1) => void;
   minimize: (id: string) => void;
   restoreFromMinimized: (id: string) => void;
   maximizeWindow: (id: string, rect: Rect) => void;
@@ -82,6 +83,20 @@ export const useWindowStore = create<WindowStoreState>((set, get) => ({
     set((state) => {
       if (!(id in state.windows) || state.zOrder.at(-1) === id) return state;
       return { zOrder: [...state.zOrder.filter((w) => w !== id), id] };
+    }),
+
+  cycleFocus: (direction) =>
+    set((state) => {
+      const visible = state.zOrder.filter((id) => state.windows[id]?.minimized === false);
+      if (visible.length <= 1) return state;
+      // A true rotation, not a top<->second swap: each press should bring a
+      // *different* window forward than the last, visiting every window
+      // exactly once before returning to the start after N presses.
+      const top = visible[visible.length - 1] as string;
+      const rotated = direction === -1 ? [top, ...visible.slice(0, -1)] : [...visible.slice(1), visible[0] as string];
+      const rotatedSet = new Set(rotated);
+      const others = state.zOrder.filter((id) => !rotatedSet.has(id));
+      return { zOrder: [...others, ...rotated] };
     }),
 
   minimize: (id) =>

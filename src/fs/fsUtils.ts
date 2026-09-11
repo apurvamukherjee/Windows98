@@ -15,6 +15,12 @@ export function getTextFiles(nodes: Record<string, FSNode>, parentId: string): F
   );
 }
 
+export function getImageFiles(nodes: Record<string, FSNode>, parentId: string): FileNode[] {
+  return getChildren(nodes, parentId).filter(
+    (node): node is FileNode => node.kind === 'file' && node.fileType === 'image',
+  );
+}
+
 /** Root-to-node chain, e.g. [This PC, Documents], for breadcrumbs. */
 export function getPathChain(nodes: Record<string, FSNode>, id: string): FSNode[] {
   const chain: FSNode[] = [];

@@ -17,6 +17,19 @@ function nodeIcon(node: FSNode): string {
   return node.fileType === 'image' ? '🖼️' : '📄';
 }
 
+// Solid colors only — see the project's wallpaper decision: the real
+// Windows 98 default desktop background *is* solid teal, and the classic
+// bitmap wallpapers (Clouds, etc.) are Microsoft's copyrighted assets, not
+// something to redistribute in a public repo. These are period-plausible
+// solid alternatives, not reproductions of any shipped asset.
+const WALLPAPER_PRESETS: { label: string; color: string }[] = [
+  { label: 'Teal', color: '#008080' },
+  { label: 'Navy', color: '#000080' },
+  { label: 'Maroon', color: '#800000' },
+  { label: 'Purple', color: '#800080' },
+  { label: 'Dark Gray', color: '#808080' },
+];
+
 interface MenuState {
   x: number;
   y: number;
@@ -30,6 +43,7 @@ export function Desktop(): React.JSX.Element {
   const createFolder = useFSStore((state) => state.createFolder);
   const iconPositions = useDesktopStore((state) => state.iconPositions);
   const setIconPosition = useDesktopStore((state) => state.setIconPosition);
+  const setWallpaper = useDesktopStore((state) => state.setWallpaper);
 
   const children = getChildren(nodes, DESKTOP_ID);
   const defaultPositions = useMemo(
@@ -216,6 +230,10 @@ export function Desktop(): React.JSX.Element {
             setSelectedIds(new Set([id]));
           },
         },
+        ...WALLPAPER_PRESETS.map((preset) => ({
+          label: `Wallpaper: ${preset.label}`,
+          onSelect: () => setWallpaper(preset.color),
+        })),
       ],
     });
   };

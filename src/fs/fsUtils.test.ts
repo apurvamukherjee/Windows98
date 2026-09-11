@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { getChildren, getPathChain, getTextFiles, uniqueSiblingName } from './fsUtils';
+import { getChildren, getImageFiles, getPathChain, getTextFiles, uniqueSiblingName } from './fsUtils';
 import type { FSNode } from './fsTypes';
 
 const nodes: Record<string, FSNode> = {
@@ -59,6 +59,12 @@ describe('getChildren', () => {
 describe('getTextFiles', () => {
   test('filters to text files only, within the given folder', () => {
     expect(getTextFiles(nodes, 'docs').map((n) => n.id)).toEqual(['a', 'b']);
+  });
+});
+
+describe('getImageFiles', () => {
+  test('filters to image files only, within the given folder', () => {
+    expect(getImageFiles(nodes, 'docs').map((n) => n.id)).toEqual(['pic']);
   });
 });
 

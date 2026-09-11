@@ -1,9 +1,14 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
+
+async function skipBootScreen(page: Page): Promise<void> {
+  await page.getByRole('button', { name: 'Skip boot screen' }).click();
+}
 
 test.beforeEach(async ({ page }) => {
   await page.goto('/');
   await page.evaluate(() => localStorage.clear());
   await page.reload();
+  await skipBootScreen(page);
   await page.waitForSelector('[data-testid^="window-"]');
 });
 
@@ -15,6 +20,7 @@ test('saved text survives a reload', async ({ page }) => {
   // Let the debounced save fire.
   await page.waitForTimeout(700);
   await page.reload();
+  await skipBootScreen(page);
 
   await expect(page.getByLabel('Notepad document').first()).toHaveValue('Persisted across reload.');
 });
@@ -33,10 +39,14 @@ test('a moved desktop icon keeps its position after reload', async ({ page }) =>
   await page.mouse.move(box.x + 10, box.y - 10);
   await page.mouse.down();
   await page.mouse.move(600, 500, { steps: 10 });
+  // Settle wait: see drag-resize.spec.ts — headless WebKit needs a beat to
+  // process queued requestAnimationFrame callbacks before mouseup.
+  await page.waitForTimeout(50);
   await page.mouse.up();
 
   await page.waitForTimeout(700);
   await page.reload();
+  await skipBootScreen(page);
 
   const restoredBox = await page.getByText('New Folder').boundingBox();
   expect(restoredBox?.x).toBeGreaterThan(400);
@@ -52,6 +62,7 @@ test('Reset Desktop clears saved state back to a fresh boot', async ({ page }) =
   page.once('dialog', (dialog) => dialog.accept());
   await page.getByRole('menuitem', { name: 'Reset Desktop' }).click();
 
+  await skipBootScreen(page);
   await page.waitForSelector('[data-testid^="window-"]');
   await expect(page.getByLabel('Notepad document').first()).toHaveValue('');
 });

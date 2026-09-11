@@ -1,4 +1,4 @@
-import { memo, useCallback, useRef, type RefObject } from 'react';
+import { memo, useCallback, useEffect, useRef, useState, type RefObject } from 'react';
 import { useWindowStore, type Rect } from '../../stores/windowStore';
 import { usePointerDrag } from '../../hooks/usePointerDrag';
 import { useIsSmallScreen } from '../../hooks/useMediaQuery';
@@ -39,6 +39,48 @@ function WindowImpl({ id, snapGhostRef }: WindowProps): React.JSX.Element | null
   const pendingSnapZone = useRef<ReturnType<typeof detectSnapZone>>(null);
   const hasRestoredForGesture = useRef(false);
 
+  const [isMinimizeAnimating, setIsMinimizeAnimating] = useState(false);
+  const [prevMinimized, setPrevMinimized] = useState(win?.minimized ?? false);
+
+  // Detecting the transition during render (React's documented "adjust
+  // state while rendering" pattern — a ref would be unsafe here, since
+  // mutating one during render isn't guaranteed to survive a discarded
+  // render pass under concurrent rendering) rather than in an effect body,
+  // which would cost an extra commit before the animation could start.
+  if (win !== undefined && win.minimized !== prevMinimized) {
+    setPrevMinimized(win.minimized);
+    if (win.minimized) {
+      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (!reduceMotion) setIsMinimizeAnimating(true);
+    } else {
+      setIsMinimizeAnimating(false);
+    }
+  }
+
+  // The timer's own callback is where setState belongs — this effect just
+  // arms/disarms it in response to `isMinimizeAnimating`, never calling
+  // setState synchronously from the effect body itself.
+  useEffect(() => {
+    if (!isMinimizeAnimating) return;
+    const timer = setTimeout(() => setIsMinimizeAnimating(false), 160);
+    return () => clearTimeout(timer);
+  }, [isMinimizeAnimating]);
+
+  // Focus the window when it (re)appears — on open, and on restore from
+  // minimize, since Window fully unmounts while minimized.
+  useEffect(() => {
+    rootRef.current?.focus();
+  }, []);
+
+  const disableTransition = useCallback(() => {
+    const node = rootRef.current;
+    if (node !== null) node.style.transition = 'none';
+  }, []);
+  const restoreTransition = useCallback(() => {
+    const node = rootRef.current;
+    if (node !== null) node.style.transition = '';
+  }, []);
+
   const applyTransform = useCallback((x: number, y: number) => {
     const node = rootRef.current;
     if (node === null) return;
@@ -56,6 +98,7 @@ function WindowImpl({ id, snapGhostRef }: WindowProps): React.JSX.Element | null
   const dragHandlers = usePointerDrag({
     onDragStart: () => {
       if (win === undefined) return;
+      disableTransition();
       pendingSnapZone.current = null;
       hasRestoredForGesture.current = false;
       // Deliberately NOT restoring a maximized/snapped window here: a plain
@@ -90,6 +133,7 @@ function WindowImpl({ id, snapGhostRef }: WindowProps): React.JSX.Element | null
       ghost.show(snapZoneRect(zone, w, h + TASKBAR_HEIGHT_PX, TASKBAR_HEIGHT_PX));
     },
     onDragEnd: (dx, dy) => {
+      restoreTransition();
       snapGhostRef.current?.hide();
       const zone = pendingSnapZone.current;
       if (zone !== null) {
@@ -106,12 +150,14 @@ function WindowImpl({ id, snapGhostRef }: WindowProps): React.JSX.Element | null
   const resizeHandlers = usePointerDrag({
     onDragStart: () => {
       if (win === undefined) return;
+      disableTransition();
       gestureBase.current = { x: win.x, y: win.y, w: win.w, h: win.h };
     },
     onDrag: (dx, dy) => {
       applyRect(computeResize(activeHandle.current, gestureBase.current, dx, dy));
     },
     onDragEnd: (dx, dy) => {
+      restoreTransition();
       resizeWindow(id, computeResize(activeHandle.current, gestureBase.current, dx, dy));
     },
   });
@@ -135,22 +181,27 @@ function WindowImpl({ id, snapGhostRef }: WindowProps): React.JSX.Element | null
     }
   }, [id, maximizeWindow, restoreWindow]);
 
-  if (win === undefined || win.minimized) return null;
+  if (win === undefined) return null;
+  if (win.minimized && !isMinimizeAnimating) return null;
 
   const rect = isSmallScreen ? { x: 0, y: 0, ...usableViewport() } : win;
   const appDef = APP_REGISTRY[win.appId];
   const AppComponent = appDef?.component;
+
+  const rectStyle = { transform: `translate3d(${rect.x}px, ${rect.y}px, 0)`, width: rect.w, height: rect.h };
+  const minimizingStyle = win.minimized
+    ? { transform: `translate3d(${rect.x}px, ${rect.y}px, 0) scale(0.05)`, opacity: 0 }
+    : {};
 
   return (
     <div
       ref={rootRef}
       data-testid={`window-${id}`}
       className={styles.window}
-      style={{
-        transform: `translate3d(${rect.x}px, ${rect.y}px, 0)`,
-        width: rect.w,
-        height: rect.h,
-      }}
+      style={{ ...rectStyle, ...minimizingStyle }}
+      role="dialog"
+      aria-label={appDef?.title ?? win.appId}
+      tabIndex={-1}
       onPointerDownCapture={() => focus(id)}
     >
       {/* Rendered first so they paint underneath the titlebar/content —

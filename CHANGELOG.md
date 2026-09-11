@@ -4,6 +4,26 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+### Added — Paint (M8)
+- Full Paint app: pencil, eraser, line, rectangle, and a real stack-based flood fill, over a raw Canvas 2D API (no canvas library).
+- Canvas backing store sized to `devicePixelRatio` deliberately, so drawings are crisp on retina displays rather than blurry by accident.
+- Save/Open wired to the same file system as every other app — a drawing saved in Paint is a real image `FileNode`, browsable in Explorer and reopenable exactly as drawn.
+
+### Added — Terminal (M9)
+- A real shell (`ls, cd, cat, mkdir, touch, rm, echo, open, clear, help`) against the *same* `useFSStore` every other app uses — delete a file from the Terminal and it vanishes live from an already-open Explorer window, no refresh.
+- Real path resolution: absolute (`/Documents`), relative, `.`/`..`, multi-segment.
+- `open` on a file launches it in whichever app claims that type; `open` on a folder launches a real scoped Explorer window — the same shared helpers Explorer and the Desktop use.
+- Command history (Arrow Up/Down) and scrollback, the latter persisted per window instance so it survives minimize/restore.
+
+### Added — Final polish (M10)
+- Lightweight window switcher: Ctrl+Tab / Cmd+Tab cycles focus through open windows (Shift reverses direction) — real Alt+Tab is an OS-level shortcut a page can never intercept, so this is the closest binding that actually works.
+- Minimize now animates (shrink + fade toward the taskbar) instead of vanishing instantly; maximize/restore/snap-settle animate via a CSS transition that's explicitly suspended during an active drag/resize so it never fights the ref-driven gesture. Everything respects `prefers-reduced-motion`.
+- Windows are `role="dialog"` with an `aria-label` from the app title, and receive focus on open/restore.
+- A wallpaper picker (right-click the desktop) — solid colors only; see Decisions.
+- Taskbar pinning: pin any running app (right-click its taskbar button) to keep a launcher there after it closes.
+- A boot screen on load (skippable by click or keypress), respecting `prefers-reduced-motion`.
+- A real, committed Playwright suite — `drag-resize.spec.ts`, `snap.spec.ts`, `dnd-explorer-desktop.spec.ts` — run across Chromium, Firefox, and WebKit in addition to the persistence suite.
+
 ### Added — Persistence (M7)
 - Combined `localStorage` envelope covering the file system, windows, desktop icon positions, and per-window app state — one atomic snapshot rather than four independently-drifting keys.
 - Debounced writes (~500ms, trailing) plus a synchronous flush on `visibilitychange`/`beforeunload`, so closing the tab right after typing doesn't lose the last few keystrokes.
@@ -58,3 +78,6 @@ All notable changes to this project are documented in this file.
 - The snap-preview overlay no longer renders above other, non-dragged windows.
 - Explorer's rename input now selects the existing name on focus, instead of placing the cursor at the end — typing immediately after clicking Rename used to append to the old name rather than replace it.
 - "Reset Desktop" no longer silently fails to reset: the page's own `beforeunload` flush listener was re-saving the about-to-be-cleared state during the reload it triggers, undoing the reset before the fresh page finished loading.
+- **Resizing was silently broken in every real browser** (M10): the same paint-order fix that made resize handles render underneath the titlebar also let window *content* paint on top of the handles at the corners, swallowing every resize pointerdown. No unit test caught it because jsdom doesn't do real hit-testing — only writing the first real Playwright resize spec surfaced it. Fixed with an explicit z-index scheme inside each window (content < handles < titlebar) instead of relying on DOM order.
+- The Alt+Tab-style window cycler originally just toggled between the top two windows on repeated presses instead of rotating through all of them — caught by a unit test that asserted a full N-press cycle returns to the start.
+- Fixed a genuine cross-browser quirk in the E2E suite itself: Playwright's `steps`-based synthetic mouse drag fires pointermove events too tightly for headless WebKit to process queued `requestAnimationFrame` callbacks before release, so drags silently no-opped in WebKit test runs specifically (never a real-user issue — real Safari input is naturally paced to frame timing). Fixed with a short settle wait before every `mouse.up()` in the E2E suite.
