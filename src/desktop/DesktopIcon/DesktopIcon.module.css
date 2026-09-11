@@ -14,7 +14,19 @@
 }
 
 .glyph {
+  position: relative;
   font-size: 28px;
+}
+
+.badge {
+  position: absolute;
+  top: -2px;
+  right: -4px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #cc0000;
+  border: 1px solid #ffffff;
 }
 
 .label {

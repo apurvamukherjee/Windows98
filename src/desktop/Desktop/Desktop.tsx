@@ -9,10 +9,13 @@ import { openFile } from '../../apps/openFile';
 import { openFolderInExplorer } from '../../apps/openFolderInExplorer';
 import { DesktopIcon } from '../DesktopIcon/DesktopIcon';
 import { ContextMenu, type ContextMenuItem } from '../../context-menu/ContextMenu/ContextMenu';
+import { AboutDialog } from '../../easter-eggs/about/AboutDialog';
+import { playCrumpleSound } from '../../easter-eggs/recycleBin/crumpleSound';
 import type { FSNode } from '../../fs/fsTypes';
 import styles from './Desktop.module.css';
 
 function nodeIcon(node: FSNode): string {
+  if (node.id === RECYCLE_BIN_ID) return '🗑️';
   if (node.kind === 'folder') return '📁';
   return node.fileType === 'image' ? '🖼️' : '📄';
 }
@@ -62,11 +65,21 @@ export function Desktop(): React.JSX.Element {
   const moveNode = useFSStore((state) => state.moveNode);
   const renameNode = useFSStore((state) => state.renameNode);
   const createFolder = useFSStore((state) => state.createFolder);
+  const deleteNodeRecursive = useFSStore((state) => state.deleteNodeRecursive);
   const iconPositions = useDesktopStore((state) => state.iconPositions);
   const setIconPosition = useDesktopStore((state) => state.setIconPosition);
   const setWallpaper = useDesktopStore((state) => state.setWallpaper);
 
+  const [aboutOpen, setAboutOpen] = useState(false);
+
   const children = getChildren(nodes, DESKTOP_ID);
+  const recycleBinContents = getChildren(nodes, RECYCLE_BIN_ID);
+
+  const onEmptyRecycleBin = (): void => {
+    if (recycleBinContents.length === 0) return;
+    for (const item of recycleBinContents) deleteNodeRecursive(item.id);
+    playCrumpleSound();
+  };
   const defaultPositions = useMemo(
     () => assignDefaultPositions(children.map((child) => child.id), iconPositions),
     [children, iconPositions],
@@ -96,6 +109,12 @@ export function Desktop(): React.JSX.Element {
       dragBase.current = new Map();
       for (const memberId of nextSelection) {
         dragBase.current.set(memberId, positionOf(memberId));
+        // Otherwise the dragged icon itself — which follows the cursor — is
+        // what elementFromPoint hits at drop time, since same-z-order
+        // desktop icons stack by DOM order. Hiding it from hit-testing lets
+        // the drop resolve to whatever icon/window is actually underneath.
+        const node = iconNodeRefs.current.get(memberId);
+        if (node !== undefined) node.style.pointerEvents = 'none';
       }
     },
     onDrag: (dx, dy) => {
@@ -107,6 +126,11 @@ export function Desktop(): React.JSX.Element {
       }
     },
     onDragEnd: (dx, dy, clientX, clientY) => {
+      for (const memberId of dragMoveSet.current) {
+        const node = iconNodeRefs.current.get(memberId);
+        if (node !== undefined) node.style.pointerEvents = '';
+      }
+
       if (dx === 0 && dy === 0) {
         const id = dragIconId.current;
         if (id !== null && ctrlHeld.current) {
@@ -204,6 +228,24 @@ export function Desktop(): React.JSX.Element {
   const onIconContextMenu = (id: string, event: React.MouseEvent): void => {
     event.preventDefault();
     event.stopPropagation();
+
+    if (id === RECYCLE_BIN_ID) {
+      setSelectedIds(new Set([id]));
+      setMenu({
+        x: event.clientX,
+        y: event.clientY,
+        items: [
+          { label: 'Open', onSelect: () => onOpenNode(nodes[RECYCLE_BIN_ID] as FSNode) },
+          {
+            label: 'Empty Recycle Bin',
+            disabled: recycleBinContents.length === 0,
+            onSelect: onEmptyRecycleBin,
+          },
+        ],
+      });
+      return;
+    }
+
     const targetIds = selectedIds.has(id) ? selectedIds : new Set([id]);
     setSelectedIds(targetIds);
     setMenu({
@@ -255,6 +297,10 @@ export function Desktop(): React.JSX.Element {
           label: `Wallpaper: ${preset.label}`,
           onSelect: () => setWallpaper(preset.background),
         })),
+        {
+          label: 'About Windows98.app',
+          onSelect: () => setAboutOpen(true),
+        },
       ],
     });
   };
@@ -266,8 +312,10 @@ export function Desktop(): React.JSX.Element {
         return (
           <DesktopIcon
             key={node.id}
+            id={node.id}
             name={node.name}
             glyph={nodeIcon(node)}
+            badge={node.id === RECYCLE_BIN_ID && recycleBinContents.length > 0}
             x={pos.x}
             y={pos.y}
             selected={selectedIds.has(node.id)}
@@ -288,6 +336,7 @@ export function Desktop(): React.JSX.Element {
       })}
       <div ref={rubberBandRef} className={styles.rubberBand} />
       {menu !== null && <ContextMenu x={menu.x} y={menu.y} items={menu.items} onClose={() => setMenu(null)} />}
+      {aboutOpen && <AboutDialog onClose={() => setAboutOpen(false)} />}
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import { useWindowStore } from '../stores/windowStore';
 import { useAppInstanceStore } from '../stores/appInstanceStore';
-import { ROOT_ID } from '../stores/fsStore';
+import { useFSStore, ROOT_ID } from '../stores/fsStore';
 
 export type DropTarget = { kind: 'explorer'; folderId: string } | { kind: 'desktop' } | null;
 
@@ -14,6 +14,15 @@ export type DropTarget = { kind: 'explorer'; folderId: string } | { kind: 'deskt
 export function resolveDropTarget(clientX: number, clientY: number): DropTarget {
   const el = document.elementFromPoint(clientX, clientY);
   if (el === null) return null;
+
+  // Dropping onto another desktop icon that's itself a folder (Recycle Bin
+  // included) moves the item inside it — the same "check what's under the
+  // cursor" resolution as dropping onto an open Explorer window.
+  const iconId = el.closest('[data-desktop-icon-id]')?.getAttribute('data-desktop-icon-id');
+  if (iconId !== null && iconId !== undefined) {
+    const iconNode = useFSStore.getState().nodes[iconId];
+    if (iconNode?.kind === 'folder') return { kind: 'explorer', folderId: iconNode.id };
+  }
 
   const windowEl = el.closest('[data-testid^="window-"]');
   if (windowEl === null) {

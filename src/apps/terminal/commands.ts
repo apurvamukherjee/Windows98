@@ -19,7 +19,7 @@ export interface CommandResult {
   output: string[];
   newCwd?: string;
   clear?: boolean;
-  easterEgg?: 'matrix' | 'bsod';
+  easterEgg?: 'matrix' | 'bsod' | 'error-cascade';
 }
 
 function tokenize(input: string): string[] {
@@ -140,6 +140,9 @@ export function runCommand(input: string, ctx: CommandContext): CommandResult {
 
     case 'bsod':
       return { output: [], easterEgg: 'bsod' };
+
+    case 'error':
+      return { output: [], easterEgg: 'error-cascade' };
 
     default:
       return { output: [`${cmd}: command not found`] };

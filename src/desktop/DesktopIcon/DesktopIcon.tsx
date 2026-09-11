@@ -1,8 +1,10 @@
 import styles from './DesktopIcon.module.css';
 
 interface DesktopIconProps {
+  id: string;
   name: string;
   glyph: string;
+  badge?: boolean;
   x: number;
   y: number;
   selected: boolean;
@@ -18,8 +20,10 @@ interface DesktopIconProps {
 }
 
 export function DesktopIcon({
+  id,
   name,
   glyph,
+  badge = false,
   x,
   y,
   selected,
@@ -36,13 +40,17 @@ export function DesktopIcon({
   return (
     <div
       ref={nodeRef}
+      data-desktop-icon-id={id}
       className={`${styles.icon} ${selected ? styles.selected : ''}`}
       style={{ transform: `translate3d(${x}px, ${y}px, 0)` }}
       onPointerDown={onPointerDown}
       onDoubleClick={onDoubleClick}
       onContextMenu={onContextMenu}
     >
-      <span className={styles.glyph}>{glyph}</span>
+      <span className={styles.glyph}>
+        {glyph}
+        {badge && <span className={styles.badge} aria-label="non-empty" />}
+      </span>
       {renaming ? (
         <input
           className={styles.renameInput}

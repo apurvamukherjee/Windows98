@@ -46,7 +46,10 @@ export function seedFolders(): Record<string, FSNode> {
     [ROOT_ID]: folder(ROOT_ID, null, 'This PC'),
     [DESKTOP_ID]: folder(DESKTOP_ID, ROOT_ID, 'Desktop'),
     [DOCUMENTS_ID]: folder(DOCUMENTS_ID, ROOT_ID, 'Documents'),
-    [RECYCLE_BIN_ID]: folder(RECYCLE_BIN_ID, ROOT_ID, 'Recycle Bin'),
+    // A real desktop icon (not tucked inside This PC) — that's where it
+    // lives on the genuine article, and it's what makes the "empty it"
+    // easter egg discoverable at all.
+    [RECYCLE_BIN_ID]: folder(RECYCLE_BIN_ID, DESKTOP_ID, 'Recycle Bin'),
     [CREDITS_ID]: credits,
   };
 }
@@ -59,6 +62,8 @@ interface FSStoreState {
   createFolder: (parentId: string, name: string) => string;
   renameNode: (id: string, name: string) => void;
   moveNode: (id: string, newParentId: string) => void;
+  /** Permanently deletes a node and every descendant — used to empty the Recycle Bin, not for the ordinary "Delete" action (which just moves to it). */
+  deleteNodeRecursive: (id: string) => void;
 }
 
 export const useFSStore = create<FSStoreState>((set, get) => ({
@@ -130,5 +135,23 @@ export const useFSStore = create<FSStoreState>((set, get) => ({
       return {
         nodes: { ...state.nodes, [id]: { ...node, parentId: newParentId, modifiedAt: Date.now() } },
       };
+    }),
+
+  deleteNodeRecursive: (id) =>
+    set((state) => {
+      if (state.nodes[id] === undefined) return state;
+      const toDelete = new Set<string>();
+      const collect = (nodeId: string): void => {
+        if (toDelete.has(nodeId)) return;
+        toDelete.add(nodeId);
+        for (const node of Object.values(state.nodes)) {
+          if (node.parentId === nodeId) collect(node.id);
+        }
+      };
+      collect(id);
+
+      const nodes = { ...state.nodes };
+      for (const deletedId of toDelete) delete nodes[deletedId];
+      return { nodes };
     }),
 }));

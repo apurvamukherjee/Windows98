@@ -208,4 +208,8 @@ describe('easter eggs', () => {
   test('bsod signals the bsod easter egg with no visible output', () => {
     expect(runCommand('bsod', ctx)).toEqual({ output: [], easterEgg: 'bsod' });
   });
+
+  test('error signals the error-cascade easter egg with no visible output', () => {
+    expect(runCommand('error', ctx)).toEqual({ output: [], easterEgg: 'error-cascade' });
+  });
 });

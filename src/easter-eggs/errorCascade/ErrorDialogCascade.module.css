@@ -1,0 +1,51 @@
+.dialog {
+  position: fixed;
+  z-index: 3000;
+  width: 260px;
+  background: var(--win98-face);
+  border: 2px solid;
+  border-color: var(--win98-light) var(--win98-dark-shadow) var(--win98-dark-shadow) var(--win98-light);
+  box-shadow:
+    inset 1px 1px 0 var(--win98-highlight),
+    inset -1px -1px 0 var(--win98-shadow);
+}
+
+.titlebar {
+  height: 20px;
+  display: flex;
+  align-items: center;
+  padding: 0 4px;
+  background: linear-gradient(90deg, var(--win98-title-active), #1084d0);
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.body {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px;
+  font-size: 12px;
+}
+
+.icon {
+  font-size: 22px;
+  flex: none;
+}
+
+.buttons {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0 10px 10px;
+}
+
+.buttons button {
+  height: 22px;
+  min-width: 60px;
+  font-size: 12px;
+  background: var(--win98-face);
+  border: 1px solid;
+  border-color: var(--win98-light) var(--win98-dark-shadow) var(--win98-dark-shadow) var(--win98-light);
+  cursor: default;
+}

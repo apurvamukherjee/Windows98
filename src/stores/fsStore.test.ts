@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, test } from 'vitest';
-import { DOCUMENTS_ID, RECYCLE_BIN_ID, ROOT_ID, seedFolders, useFSStore } from './fsStore';
+import { DESKTOP_ID, DOCUMENTS_ID, RECYCLE_BIN_ID, ROOT_ID, seedFolders, useFSStore } from './fsStore';
 
 beforeEach(() => {
   useFSStore.setState({ nodes: seedFolders(), nextNodeSeq: 0 });
@@ -10,7 +10,7 @@ describe('seeded tree', () => {
     const nodes = useFSStore.getState().nodes;
     expect(nodes[ROOT_ID]).toMatchObject({ kind: 'folder', parentId: null });
     expect(nodes[DOCUMENTS_ID]).toMatchObject({ kind: 'folder', parentId: ROOT_ID });
-    expect(nodes[RECYCLE_BIN_ID]).toMatchObject({ kind: 'folder', parentId: ROOT_ID });
+    expect(nodes[RECYCLE_BIN_ID]).toMatchObject({ kind: 'folder', parentId: DESKTOP_ID });
   });
 });
 
@@ -104,6 +104,35 @@ describe('moveNode', () => {
 
     useFSStore.getState().moveNode(parentId, childId);
 
+    expect(useFSStore.getState()).toBe(before);
+  });
+});
+
+describe('deleteNodeRecursive', () => {
+  test('permanently removes a file', () => {
+    const id = useFSStore.getState().createFile(RECYCLE_BIN_ID, 'gone.txt', 'text', '');
+    useFSStore.getState().deleteNodeRecursive(id);
+    expect(useFSStore.getState().nodes[id]).toBeUndefined();
+  });
+
+  test('permanently removes a folder and everything inside it', () => {
+    const folderId = useFSStore.getState().createFolder(RECYCLE_BIN_ID, 'OldStuff');
+    const fileId = useFSStore.getState().createFile(folderId, 'inside.txt', 'text', '');
+    const nestedFolderId = useFSStore.getState().createFolder(folderId, 'Nested');
+    const nestedFileId = useFSStore.getState().createFile(nestedFolderId, 'deep.txt', 'text', '');
+
+    useFSStore.getState().deleteNodeRecursive(folderId);
+
+    const nodes = useFSStore.getState().nodes;
+    expect(nodes[folderId]).toBeUndefined();
+    expect(nodes[fileId]).toBeUndefined();
+    expect(nodes[nestedFolderId]).toBeUndefined();
+    expect(nodes[nestedFileId]).toBeUndefined();
+  });
+
+  test('is a no-op for an unknown id', () => {
+    const before = useFSStore.getState();
+    useFSStore.getState().deleteNodeRecursive('missing');
     expect(useFSStore.getState()).toBe(before);
   });
 });

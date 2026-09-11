@@ -102,6 +102,7 @@ export function Terminal({ windowId }: AppComponentProps): React.JSX.Element {
 
     if (result.easterEgg === 'matrix') setMatrixColumns(Array.from({ length: 16 }, () => randomMatrixColumn(14)));
     if (result.easterEgg === 'bsod') useEasterEggStore.getState().triggerBsod();
+    if (result.easterEgg === 'error-cascade') useEasterEggStore.getState().triggerErrorCascade();
 
     if (result.clear === true) {
       patchInstanceState(windowId, { log: [], cwd: result.newCwd ?? cwd });

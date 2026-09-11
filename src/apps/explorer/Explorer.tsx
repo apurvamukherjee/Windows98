@@ -9,10 +9,12 @@ import { FolderTree } from './FolderTree';
 import { usePointerDrag } from '../../hooks/usePointerDrag';
 import { resolveDropTarget } from '../../desktop/dropTarget';
 import { snapToGrid } from '../../desktop/grid';
+import { playCrumpleSound } from '../../easter-eggs/recycleBin/crumpleSound';
 import type { FSNode } from '../../fs/fsTypes';
 import styles from './Explorer.module.css';
 
 function nodeIcon(node: FSNode): string {
+  if (node.id === RECYCLE_BIN_ID) return '🗑️';
   if (node.kind === 'folder') return '📁';
   return node.fileType === 'image' ? '🖼️' : '📄';
 }
@@ -26,6 +28,7 @@ export function Explorer({ windowId }: AppComponentProps): React.JSX.Element {
   const createFolder = useFSStore((state) => state.createFolder);
   const renameNode = useFSStore((state) => state.renameNode);
   const moveNode = useFSStore((state) => state.moveNode);
+  const deleteNodeRecursive = useFSStore((state) => state.deleteNodeRecursive);
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [renamingId, setRenamingId] = useState<string | null>(null);
@@ -96,6 +99,15 @@ export function Explorer({ windowId }: AppComponentProps): React.JSX.Element {
     setSelectedId(null);
   };
 
+  const isRecycleBin = currentFolderId === RECYCLE_BIN_ID;
+
+  const onEmptyRecycleBin = (): void => {
+    if (children.length === 0) return;
+    for (const item of children) deleteNodeRecursive(item.id);
+    playCrumpleSound();
+    setSelectedId(null);
+  };
+
   return (
     <div className={styles.wrapper}>
       <div className={styles.toolbar}>
@@ -110,15 +122,33 @@ export function Explorer({ windowId }: AppComponentProps): React.JSX.Element {
         >
           Up
         </button>
-        <button type="button" className={styles.toolbarButton} onClick={onNewFolder}>
-          New Folder
-        </button>
-        <button type="button" className={styles.toolbarButton} disabled={selectedId === null} onClick={onStartRename}>
-          Rename
-        </button>
-        <button type="button" className={styles.toolbarButton} disabled={selectedId === null} onClick={onDelete}>
-          Delete
-        </button>
+        {isRecycleBin ? (
+          <button
+            type="button"
+            className={styles.toolbarButton}
+            disabled={children.length === 0}
+            onClick={onEmptyRecycleBin}
+          >
+            Empty Recycle Bin
+          </button>
+        ) : (
+          <>
+            <button type="button" className={styles.toolbarButton} onClick={onNewFolder}>
+              New Folder
+            </button>
+            <button
+              type="button"
+              className={styles.toolbarButton}
+              disabled={selectedId === null}
+              onClick={onStartRename}
+            >
+              Rename
+            </button>
+            <button type="button" className={styles.toolbarButton} disabled={selectedId === null} onClick={onDelete}>
+              Delete
+            </button>
+          </>
+        )}
         <button
           type="button"
           className={styles.toolbarButton}

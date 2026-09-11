@@ -12,10 +12,17 @@ beforeEach(() => {
 });
 
 describe('navigation', () => {
-  test('boots at This PC, showing Desktop/Documents/Recycle Bin', () => {
+  test('boots at This PC, showing Desktop and Documents', () => {
     render(<Explorer windowId="win-1" />);
     expect(screen.getByText('Desktop')).toBeInTheDocument();
     expect(screen.getByText('Documents')).toBeInTheDocument();
+  });
+
+  test('Recycle Bin lives inside Desktop, not directly under This PC', () => {
+    render(<Explorer windowId="win-1" />);
+    expect(screen.queryByText('Recycle Bin')).not.toBeInTheDocument();
+
+    fireEvent.doubleClick(screen.getByText('Desktop'));
     expect(screen.getByText('Recycle Bin')).toBeInTheDocument();
   });
 
@@ -90,6 +97,33 @@ describe('CRUD', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Delete' }));
 
     expect(useFSStore.getState().nodes[id]).toMatchObject({ parentId: RECYCLE_BIN_ID });
+  });
+});
+
+describe('Recycle Bin', () => {
+  test('shows "Empty Recycle Bin" instead of New Folder/Rename/Delete while browsing it', () => {
+    useAppInstanceStore.getState().patchInstanceState('win-1', { currentFolderId: RECYCLE_BIN_ID });
+    render(<Explorer windowId="win-1" />);
+
+    expect(screen.getByRole('button', { name: 'Empty Recycle Bin' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'New Folder' })).not.toBeInTheDocument();
+  });
+
+  test('Empty Recycle Bin is disabled when it has nothing in it', () => {
+    useAppInstanceStore.getState().patchInstanceState('win-1', { currentFolderId: RECYCLE_BIN_ID });
+    render(<Explorer windowId="win-1" />);
+
+    expect(screen.getByRole('button', { name: 'Empty Recycle Bin' })).toBeDisabled();
+  });
+
+  test('Empty Recycle Bin permanently deletes its contents', () => {
+    const id = useFSStore.getState().createFile(RECYCLE_BIN_ID, 'trash.txt', 'text', '');
+    useAppInstanceStore.getState().patchInstanceState('win-1', { currentFolderId: RECYCLE_BIN_ID });
+    render(<Explorer windowId="win-1" />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Empty Recycle Bin' }));
+
+    expect(useFSStore.getState().nodes[id]).toBeUndefined();
   });
 });
 
