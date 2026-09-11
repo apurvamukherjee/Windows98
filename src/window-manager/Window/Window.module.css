@@ -1,0 +1,110 @@
+.window {
+  position: fixed;
+  top: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--win98-face);
+  border: 2px solid;
+  border-color: var(--win98-light) var(--win98-dark-shadow) var(--win98-dark-shadow) var(--win98-light);
+  box-shadow:
+    inset 1px 1px 0 var(--win98-highlight),
+    inset -1px -1px 0 var(--win98-shadow);
+  will-change: transform;
+}
+
+.titlebar {
+  flex: none;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  padding: 0 4px;
+  background: linear-gradient(90deg, var(--win98-title-active), #1084d0);
+  color: #ffffff;
+  touch-action: none;
+  user-select: none;
+}
+
+.title {
+  font-size: 12px;
+  font-weight: bold;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.content {
+  flex: 1;
+  margin: 2px;
+  background: #ffffff;
+  overflow: auto;
+}
+
+.handle {
+  position: absolute;
+  touch-action: none;
+}
+
+.handle-n {
+  top: -3px;
+  left: 6px;
+  right: 6px;
+  height: 6px;
+  cursor: ns-resize;
+}
+
+.handle-s {
+  bottom: -3px;
+  left: 6px;
+  right: 6px;
+  height: 6px;
+  cursor: ns-resize;
+}
+
+.handle-e {
+  right: -3px;
+  top: 6px;
+  bottom: 6px;
+  width: 6px;
+  cursor: ew-resize;
+}
+
+.handle-w {
+  left: -3px;
+  top: 6px;
+  bottom: 6px;
+  width: 6px;
+  cursor: ew-resize;
+}
+
+.handle-ne {
+  top: -3px;
+  right: -3px;
+  width: 10px;
+  height: 10px;
+  cursor: nesw-resize;
+}
+
+.handle-nw {
+  top: -3px;
+  left: -3px;
+  width: 10px;
+  height: 10px;
+  cursor: nwse-resize;
+}
+
+.handle-se {
+  bottom: -3px;
+  right: -3px;
+  width: 10px;
+  height: 10px;
+  cursor: nwse-resize;
+}
+
+.handle-sw {
+  bottom: -3px;
+  left: -3px;
+  width: 10px;
+  height: 10px;
+  cursor: nesw-resize;
+}

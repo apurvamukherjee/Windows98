@@ -1,0 +1,7 @@
+.desktop {
+  position: fixed;
+  inset: 0;
+  height: 100dvh;
+  overscroll-behavior: none;
+  background-color: var(--win98-teal);
+}

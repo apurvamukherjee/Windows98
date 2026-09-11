@@ -1,0 +1,29 @@
+:root {
+  --win98-teal: #008080;
+  --win98-face: #c0c0c0;
+  --win98-shadow: #808080;
+  --win98-dark-shadow: #000000;
+  --win98-light: #dfdfdf;
+  --win98-highlight: #ffffff;
+  --win98-title-active: #000080;
+  --win98-title-inactive: #808080;
+  --win98-text: #000000;
+  --win98-taskbar-height: 28px;
+  --win98-safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  overscroll-behavior: none;
+}
+
+body {
+  font-family: 'MS Sans Serif', Tahoma, Arial, sans-serif;
+  color: var(--win98-text);
+}
