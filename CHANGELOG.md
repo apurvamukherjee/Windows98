@@ -4,6 +4,16 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+### Added — Games & easter eggs (M11)
+- **Minesweeper**: classic 9×9/10-mine board, first-click-never-a-mine, flood-fill reveal, flagging, mine counter, timer, win/lose states.
+- **Solitaire (Klondike)**: full ruleset (foundation/tableau stacking, valid multi-card run moves, stock draw/recycle, double-click-to-foundation), dragging built on the same `usePointerDrag` primitive as windows and desktop icons — proving the drag engine generalizes to a very different shape (cards, not chrome).
+- A working taskbar clock, double-click for a "Date/Time Properties" dialog — a real Windows 98 behavior, not a joke.
+- A `credits.txt` seeded into Documents from first boot.
+- Terminal joke commands: `whoami`, `sudo make me a sandwich`, `sl` (ASCII train), `matrix` (falling-character overlay inside the terminal), and a hidden `bsod` command.
+- A secret Konami code (↑↑↓↓←→←→BA) makes the desktop briefly wobble.
+- A fake crash screen (triggered by the Terminal's `bsod` command) that "reboots" back to the desktop by reusing the existing boot screen component.
+- Four additional selectable wallpapers (Clouds, Rivets, Bubbles, Squares) — original CSS gradient/pattern designs evoking the period style, alongside the existing solid-color presets.
+
 ### Added — Paint (M8)
 - Full Paint app: pencil, eraser, line, rectangle, and a real stack-based flood fill, over a raw Canvas 2D API (no canvas library).
 - Canvas backing store sized to `devicePixelRatio` deliberately, so drawings are crisp on retina displays rather than blurry by accident.
@@ -69,6 +79,7 @@ All notable changes to this project are documented in this file.
 - Vite + React 19 + TypeScript (strict) + Vitest + Playwright, ESLint/Prettier.
 
 ### Decisions
+- **No real Windows 98 wallpaper bitmaps, ever.** The classic shipped wallpapers (Clouds, Rivets, Bubbles, the tiled pattern, etc.) are Microsoft's copyrighted artwork, not something to bundle into a public repo. Every wallpaper option — including the new M11 additions — is an original CSS gradient/pattern evoking the period style, never a reproduction of a shipped asset. Same principle applied to the BSOD easter egg: its copy is an original parody, not a verbatim reproduction of Microsoft's actual error text.
 - **No native HTML5 drag-and-drop.** Desktop icons need pointer-based dragging for same-surface repositioning and multi-select — mixing that with native `draggable`/`dragstart` on the same element is a known source of browser-dependent conflicts. Every drag in the app, including cross-window file moves, goes through the same `usePointerDrag` primitive; the drop target is resolved via `document.elementFromPoint()` at release time instead.
 
 ### Fixed

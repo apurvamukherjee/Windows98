@@ -42,6 +42,10 @@
   cursor: default;
 }
 
+.spacer {
+  flex: 1;
+}
+
 .active {
   border-color: var(--win98-dark-shadow) var(--win98-light) var(--win98-light) var(--win98-dark-shadow);
   background: #d4d0c8;

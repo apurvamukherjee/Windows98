@@ -2,11 +2,19 @@ import { useEffect, useRef, useState } from 'react';
 import type { AppComponentProps } from '../APP_REGISTRY';
 import { useAppInstanceStore } from '../../stores/appInstanceStore';
 import { useFSStore, ROOT_ID, RECYCLE_BIN_ID } from '../../stores/fsStore';
+import { useEasterEggStore } from '../../stores/easterEggStore';
 import { openFile } from '../openFile';
 import { openFolderInExplorer } from '../openFolderInExplorer';
 import { runCommand } from './commands';
 import { formatCwdPath } from './pathResolve';
 import styles from './Terminal.module.css';
+
+const MATRIX_DURATION_MS = 2500;
+const MATRIX_CHARS = '01アイウエオカキクケコサシスセソ';
+
+function randomMatrixColumn(rows: number): string {
+  return Array.from({ length: rows }, () => MATRIX_CHARS[Math.floor(Math.random() * MATRIX_CHARS.length)]).join('\n');
+}
 
 interface LogEntry {
   path: string;
@@ -44,10 +52,25 @@ export function Terminal({ windowId }: AppComponentProps): React.JSX.Element {
   const moveNode = useFSStore((state) => state.moveNode);
 
   const [inputValue, setInputValue] = useState('');
+  const [matrixColumns, setMatrixColumns] = useState<string[] | null>(null);
   const historyRef = useRef<string[]>([]);
   const historyIndexRef = useRef<number | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (matrixColumns === null) return;
+    const interval = setInterval(() => {
+      setMatrixColumns((columns) => columns?.map(() => randomMatrixColumn(14)) ?? null);
+    }, 120);
+    const timeout = setTimeout(() => setMatrixColumns(null), MATRIX_DURATION_MS);
+    return () => {
+      clearInterval(interval);
+      clearTimeout(timeout);
+    };
+    // Re-runs only when the effect toggles on/off, not on every column tick.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [matrixColumns !== null]);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight });
@@ -76,6 +99,9 @@ export function Terminal({ windowId }: AppComponentProps): React.JSX.Element {
       openFile,
       openFolder: openFolderInExplorer,
     });
+
+    if (result.easterEgg === 'matrix') setMatrixColumns(Array.from({ length: 16 }, () => randomMatrixColumn(14)));
+    if (result.easterEgg === 'bsod') useEasterEggStore.getState().triggerBsod();
 
     if (result.clear === true) {
       patchInstanceState(windowId, { log: [], cwd: result.newCwd ?? cwd });
@@ -114,6 +140,15 @@ export function Terminal({ windowId }: AppComponentProps): React.JSX.Element {
 
   return (
     <div className={styles.wrapper} onClick={() => inputRef.current?.focus()}>
+      {matrixColumns !== null && (
+        <div className={styles.matrixOverlay} data-testid="matrix-overlay" aria-hidden="true">
+          {matrixColumns.map((column, index) => (
+            <pre key={index} className={styles.matrixColumn}>
+              {column}
+            </pre>
+          ))}
+        </div>
+      )}
       <div className={styles.scrollback} ref={scrollRef}>
         {log.map((entry, index) => (
           <div key={index} className={styles.entry}>

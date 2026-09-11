@@ -1,0 +1,89 @@
+.clock {
+  flex: none;
+  height: 20px;
+  padding: 0 6px;
+  font-size: 12px;
+  background: var(--win98-face);
+  border: 1px solid;
+  border-color: var(--win98-dark-shadow) var(--win98-light) var(--win98-light) var(--win98-dark-shadow);
+  cursor: default;
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background: rgba(0, 0, 0, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dialog {
+  width: 300px;
+  background: var(--win98-face);
+  border: 2px solid;
+  border-color: var(--win98-light) var(--win98-dark-shadow) var(--win98-dark-shadow) var(--win98-light);
+  box-shadow:
+    inset 1px 1px 0 var(--win98-highlight),
+    inset -1px -1px 0 var(--win98-shadow);
+}
+
+.titlebar {
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 4px;
+  background: linear-gradient(90deg, var(--win98-title-active), #1084d0);
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.closeButton {
+  width: 16px;
+  height: 14px;
+  padding: 0;
+  font-size: 10px;
+  line-height: 1;
+  background: var(--win98-face);
+  border: 1px solid;
+  border-color: var(--win98-light) var(--win98-dark-shadow) var(--win98-dark-shadow) var(--win98-light);
+  color: #000000;
+  cursor: default;
+}
+
+.body {
+  padding: 12px;
+  font-size: 12px;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 0;
+}
+
+.note {
+  margin: 10px 0 0;
+  color: var(--win98-dark-shadow);
+  font-size: 11px;
+}
+
+.buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+  padding: 8px 12px 12px;
+}
+
+.buttons button {
+  height: 22px;
+  min-width: 70px;
+  font-size: 12px;
+  background: var(--win98-face);
+  border: 1px solid;
+  border-color: var(--win98-light) var(--win98-dark-shadow) var(--win98-dark-shadow) var(--win98-light);
+  cursor: default;
+}

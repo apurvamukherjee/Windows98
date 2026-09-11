@@ -17,17 +17,38 @@ function nodeIcon(node: FSNode): string {
   return node.fileType === 'image' ? '🖼️' : '📄';
 }
 
-// Solid colors only — see the project's wallpaper decision: the real
-// Windows 98 default desktop background *is* solid teal, and the classic
-// bitmap wallpapers (Clouds, etc.) are Microsoft's copyrighted assets, not
-// something to redistribute in a public repo. These are period-plausible
-// solid alternatives, not reproductions of any shipped asset.
-const WALLPAPER_PRESETS: { label: string; color: string }[] = [
-  { label: 'Teal', color: '#008080' },
-  { label: 'Navy', color: '#000080' },
-  { label: 'Maroon', color: '#800000' },
-  { label: 'Purple', color: '#800080' },
-  { label: 'Dark Gray', color: '#808080' },
+// See the project's wallpaper decision: the real Windows 98 bitmap
+// wallpapers (Clouds, Rivets, Bubbles, the tiled "Windows" pattern, etc.)
+// are Microsoft's copyrighted assets, not something to redistribute in a
+// public repo. Everything below is an original CSS gradient/pattern
+// evoking the period style — never a reproduction of a shipped asset.
+const WALLPAPER_PRESETS: { label: string; background: string }[] = [
+  { label: 'Teal', background: '#008080' },
+  { label: 'Navy', background: '#000080' },
+  { label: 'Maroon', background: '#800000' },
+  { label: 'Purple', background: '#800080' },
+  { label: 'Dark Gray', background: '#808080' },
+  {
+    label: 'Clouds',
+    background:
+      'radial-gradient(circle at 18% 28%, rgba(255,255,255,0.9) 0 34px, transparent 46px), ' +
+      'radial-gradient(circle at 55% 65%, rgba(255,255,255,0.85) 0 46px, transparent 60px), ' +
+      'radial-gradient(circle at 82% 22%, rgba(255,255,255,0.8) 0 28px, transparent 40px), ' +
+      'radial-gradient(circle at 35% 85%, rgba(255,255,255,0.75) 0 30px, transparent 42px), ' +
+      'linear-gradient(180deg, #4d7fc0, #bcdcf4)',
+  },
+  {
+    label: 'Rivets',
+    background: 'radial-gradient(circle, #3a3a3a 0 3px, transparent 4px) 0 0/22px 22px, #6f7a85',
+  },
+  {
+    label: 'Bubbles',
+    background: 'radial-gradient(circle, rgba(255,255,255,0.55) 0 6px, transparent 7px) 0 0/28px 28px, #008080',
+  },
+  {
+    label: 'Squares',
+    background: 'repeating-conic-gradient(#006666 0% 25%, #008080 0% 50%) 0 0/18px 18px',
+  },
 ];
 
 interface MenuState {
@@ -232,7 +253,7 @@ export function Desktop(): React.JSX.Element {
         },
         ...WALLPAPER_PRESETS.map((preset) => ({
           label: `Wallpaper: ${preset.label}`,
-          onSelect: () => setWallpaper(preset.color),
+          onSelect: () => setWallpaper(preset.background),
         })),
       ],
     });

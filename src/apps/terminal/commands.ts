@@ -19,6 +19,7 @@ export interface CommandResult {
   output: string[];
   newCwd?: string;
   clear?: boolean;
+  easterEgg?: 'matrix' | 'bsod';
 }
 
 function tokenize(input: string): string[] {
@@ -109,6 +110,36 @@ export function runCommand(input: string, ctx: CommandContext): CommandResult {
       else ctx.openFile(target);
       return { output: [] };
     }
+
+    case 'whoami':
+      return { output: ['Administrator (probably). This is a simulation — nobody is really watching.'] };
+
+    case 'sudo': {
+      if (args.join(' ') === 'make me a sandwich') return { output: ['Okay.', '🥪'] };
+      return { output: [`sudo: ${args.join(' ')}: this isn't Linux, but nice try.`] };
+    }
+
+    case 'sl':
+      return {
+        output: [
+          '      ====        ________                ___________ ',
+          '  _D _|  |_______/        \\__I_I_____===__|_________| ',
+          '   |(_)---  |   H\\________/ |   |        =|___ ___|   ',
+          "   /     |  |   H  |  |     |   |         ||_| |_||   ",
+          '  |      |  |   H  |__--------------------| [___] |   ',
+          '  | ________|___H__/__|_____/[][]~\\_______|       |   ',
+          '  |/ |   |-----------I_____I [][] []  D   |=======|__ ',
+          "__/ =| o |=-~~\\  /~~\\  /~~\\  /~~\\ ____Y___________|__",
+          ' |/-=|___|=    ||    ||    ||    |_____/~\\___/       ',
+          "  \\_/      \\O=====O=====O=====O_/      \\_/           ",
+        ],
+      };
+
+    case 'matrix':
+      return { output: [], easterEgg: 'matrix' };
+
+    case 'bsod':
+      return { output: [], easterEgg: 'bsod' };
 
     default:
       return { output: [`${cmd}: command not found`] };

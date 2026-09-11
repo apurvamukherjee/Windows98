@@ -181,3 +181,31 @@ describe('unknown command', () => {
     expect(runCommand('frobnicate', ctx).output[0]).toMatch(/command not found/);
   });
 });
+
+describe('easter eggs', () => {
+  test('whoami returns a joke identity', () => {
+    expect(runCommand('whoami', ctx).output[0]).toMatch(/Administrator/);
+  });
+
+  test('sudo make me a sandwich complies', () => {
+    expect(runCommand('sudo make me a sandwich', ctx).output).toEqual(['Okay.', '🥪']);
+  });
+
+  test('sudo with anything else declines', () => {
+    expect(runCommand('sudo rm -rf /', ctx).output[0]).toMatch(/nice try/);
+  });
+
+  test('sl prints ascii art and produces no error', () => {
+    const result = runCommand('sl', ctx);
+    expect(result.output.length).toBeGreaterThan(1);
+    expect(result.output.join('\n')).not.toMatch(/command not found/);
+  });
+
+  test('matrix signals the matrix easter egg with no visible output', () => {
+    expect(runCommand('matrix', ctx)).toEqual({ output: [], easterEgg: 'matrix' });
+  });
+
+  test('bsod signals the bsod easter egg with no visible output', () => {
+    expect(runCommand('bsod', ctx)).toEqual({ output: [], easterEgg: 'bsod' });
+  });
+});

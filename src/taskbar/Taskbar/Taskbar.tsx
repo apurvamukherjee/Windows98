@@ -4,6 +4,7 @@ import { useTaskbarStore } from '../../stores/taskbarStore';
 import { APP_REGISTRY } from '../../apps/APP_REGISTRY';
 import { ContextMenu, type ContextMenuItem } from '../../context-menu/ContextMenu/ContextMenu';
 import { StartMenu } from '../StartMenu/StartMenu';
+import { Clock } from '../Clock/Clock';
 import styles from './Taskbar.module.css';
 
 interface MenuState {
@@ -120,6 +121,8 @@ export function Taskbar(): React.JSX.Element {
           </button>
         );
       })}
+      <div className={styles.spacer} />
+      <Clock />
       {menu !== null && <ContextMenu x={menu.x} y={menu.y} items={menu.items} onClose={() => setMenu(null)} />}
     </div>
   );

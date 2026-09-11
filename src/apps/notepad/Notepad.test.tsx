@@ -2,7 +2,7 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, test } from 'vitest';
 import { Notepad } from './Notepad';
 import { useAppInstanceStore } from '../../stores/appInstanceStore';
-import { DOCUMENTS_ID, seedFolders, useFSStore } from '../../stores/fsStore';
+import { CREDITS_ID, DOCUMENTS_ID, seedFolders, useFSStore } from '../../stores/fsStore';
 
 beforeEach(() => {
   useFSStore.setState({ nodes: seedFolders(), nextNodeSeq: 0 });
@@ -76,6 +76,13 @@ describe('Open', () => {
   });
 
   test('shows an empty state when there are no saved documents', () => {
+    // seedFolders() includes a first-boot credits.txt (an easter egg) in
+    // Documents, so simulate the genuinely-empty case explicitly.
+    const withoutCredits = Object.fromEntries(
+      Object.entries(useFSStore.getState().nodes).filter(([id]) => id !== CREDITS_ID),
+    );
+    useFSStore.setState({ nodes: withoutCredits });
+
     render(<Notepad windowId="win-1" />);
     fireEvent.click(screen.getByText('Open'));
     expect(screen.getByText('No documents saved yet.')).toBeInTheDocument();

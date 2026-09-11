@@ -1,18 +1,23 @@
 import { useEffect, useState } from 'react';
 import { useWindowStore } from './stores/windowStore';
 import { useDesktopStore } from './stores/desktopStore';
+import { useEasterEggStore } from './stores/easterEggStore';
 import { APP_REGISTRY } from './apps/APP_REGISTRY';
 import { initPersistence } from './persistence/persist';
 import { BootScreen } from './boot/BootScreen/BootScreen';
 import { Desktop } from './desktop/Desktop/Desktop';
 import { WindowManager } from './window-manager/WindowManager/WindowManager';
 import { Taskbar } from './taskbar/Taskbar/Taskbar';
+import { KonamiEffect } from './easter-eggs/KonamiEffect/KonamiEffect';
+import { Bsod } from './easter-eggs/bsod/Bsod';
 import styles from './App.module.css';
 
 const BOOT_DURATION_MS = 1400;
 
 export function App(): React.JSX.Element {
   const wallpaper = useDesktopStore((state) => state.wallpaper);
+  const bsodActive = useEasterEggStore((state) => state.bsodActive);
+  const dismissBsod = useEasterEggStore((state) => state.dismissBsod);
   const [booting, setBooting] = useState(true);
 
   useEffect(() => {
@@ -43,11 +48,13 @@ export function App(): React.JSX.Element {
   }, []);
 
   return (
-    <div className={styles.desktop} data-testid="desktop" style={{ backgroundColor: wallpaper }}>
+    <div className={styles.desktop} data-testid="desktop" style={{ background: wallpaper }}>
       <Desktop />
       <WindowManager />
       <Taskbar />
+      <KonamiEffect />
       {booting && <BootScreen onDismiss={() => setBooting(false)} />}
+      {bsodActive && <Bsod onDismiss={dismissBsod} />}
     </div>
   );
 }

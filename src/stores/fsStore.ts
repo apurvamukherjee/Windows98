@@ -1,11 +1,25 @@
 import { create } from 'zustand';
-import type { FileType, FolderNode, FSNode } from '../fs/fsTypes';
+import type { FileNode, FileType, FolderNode, FSNode } from '../fs/fsTypes';
 import { uniqueSiblingName } from '../fs/fsUtils';
 
 export const ROOT_ID = 'root';
 export const DESKTOP_ID = 'desktop';
 export const DOCUMENTS_ID = 'documents';
 export const RECYCLE_BIN_ID = 'recycle-bin';
+export const CREDITS_ID = 'credits';
+
+const CREDITS_TEXT = [
+  "So you went looking for the credits file. That's the right instinct.",
+  '',
+  'Windows98.app is a from-scratch simulation of a desktop OS, built to',
+  'run entirely in the browser — real drag/resize physics, a real window',
+  'manager, a real (virtual) file system shared live across every app.',
+  '',
+  'Built by Apurva Mukherjee as a portfolio centerpiece.',
+  '',
+  'Thanks for opening this file. Try the Terminal — not every command',
+  'in there is documented.',
+].join('\n');
 
 export function seedFolders(): Record<string, FSNode> {
   const now = Date.now();
@@ -17,12 +31,23 @@ export function seedFolders(): Record<string, FSNode> {
     createdAt: now,
     modifiedAt: now,
   });
+  const credits: FileNode = {
+    id: CREDITS_ID,
+    parentId: DOCUMENTS_ID,
+    name: 'credits.txt',
+    kind: 'file',
+    fileType: 'text',
+    content: CREDITS_TEXT,
+    createdAt: now,
+    modifiedAt: now,
+  };
 
   return {
     [ROOT_ID]: folder(ROOT_ID, null, 'This PC'),
     [DESKTOP_ID]: folder(DESKTOP_ID, ROOT_ID, 'Desktop'),
     [DOCUMENTS_ID]: folder(DOCUMENTS_ID, ROOT_ID, 'Documents'),
     [RECYCLE_BIN_ID]: folder(RECYCLE_BIN_ID, ROOT_ID, 'Recycle Bin'),
+    [CREDITS_ID]: credits,
   };
 }
 

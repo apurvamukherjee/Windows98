@@ -1,0 +1,30 @@
+.screen {
+  position: fixed;
+  inset: 0;
+  z-index: 5000;
+  background: #0000aa;
+  color: #ffffff;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 15px;
+  line-height: 1.5;
+  padding: 48px 64px;
+  cursor: default;
+  user-select: none;
+}
+
+.banner {
+  background: #ffffff;
+  color: #0000aa;
+  padding: 2px 8px;
+  display: inline-block;
+  margin-bottom: 24px;
+}
+
+.line {
+  margin: 0 0 8px;
+}
+
+.hint {
+  margin-top: 32px;
+  opacity: 0.85;
+}
