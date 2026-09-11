@@ -1,0 +1,20 @@
+.tree {
+  width: 140px;
+  flex: none;
+  overflow: auto;
+  background: #ffffff;
+  border-right: 1px solid var(--win98-shadow);
+  padding: 2px;
+}
+
+.row {
+  padding: 2px 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  cursor: default;
+}
+
+.rowActive {
+  background: var(--win98-title-active);
+  color: #ffffff;
+}

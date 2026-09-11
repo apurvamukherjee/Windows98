@@ -1,0 +1,130 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+}
+
+.toolbar {
+  flex: none;
+  display: flex;
+  gap: 4px;
+  padding: 2px;
+  border-bottom: 1px solid var(--win98-shadow);
+  background: var(--win98-face);
+}
+
+.toolbarButton {
+  height: 20px;
+  padding: 0 8px;
+  font-size: 12px;
+  background: var(--win98-face);
+  border: 1px solid;
+  border-color: var(--win98-light) var(--win98-dark-shadow) var(--win98-dark-shadow) var(--win98-light);
+  cursor: default;
+}
+
+.toolbarButton:disabled {
+  color: var(--win98-shadow);
+}
+
+.breadcrumb {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px 6px;
+  font-size: 12px;
+  background: #ffffff;
+  border: 1px solid var(--win98-dark-shadow);
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.breadcrumbSegment {
+  background: transparent;
+  border: none;
+  font-size: 12px;
+  cursor: default;
+  padding: 0 2px;
+}
+
+.breadcrumbSegment:hover {
+  text-decoration: underline;
+}
+
+.body {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+.main {
+  flex: 1;
+  overflow: auto;
+  background: #ffffff;
+  padding: 4px;
+}
+
+.iconGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-content: flex-start;
+}
+
+.iconItem {
+  width: 72px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 4px;
+  font-size: 11px;
+  text-align: center;
+  background: transparent;
+  border: 1px dashed transparent;
+  word-break: break-word;
+}
+
+.iconGlyph {
+  font-size: 28px;
+}
+
+.iconItemSelected {
+  background: var(--win98-title-active);
+  color: #ffffff;
+}
+
+.listRows {
+  display: flex;
+  flex-direction: column;
+}
+
+.listRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 4px;
+  font-size: 12px;
+  text-align: left;
+  background: transparent;
+  border: none;
+}
+
+.listRowSelected {
+  background: var(--win98-title-active);
+  color: #ffffff;
+}
+
+.emptyState {
+  font-size: 12px;
+  color: var(--win98-shadow);
+  padding: 8px;
+}
+
+.renameInput {
+  width: 100%;
+  font-size: 11px;
+  text-align: center;
+}

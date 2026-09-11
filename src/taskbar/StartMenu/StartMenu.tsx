@@ -1,4 +1,5 @@
 import { APP_REGISTRY } from '../../apps/APP_REGISTRY';
+import { resetPersistedState } from '../../persistence/persist';
 import styles from './StartMenu.module.css';
 
 interface StartMenuProps {
@@ -20,6 +21,20 @@ export function StartMenu({ onLaunch }: StartMenuProps): React.JSX.Element {
           {app.title}
         </button>
       ))}
+      <div className={styles.separator} />
+      <button
+        type="button"
+        role="menuitem"
+        className={styles.item}
+        onClick={() => {
+          if (window.confirm('Reset the desktop to its defaults? This clears everything you’ve saved.')) {
+            resetPersistedState();
+          }
+        }}
+      >
+        <span aria-hidden="true">🔄</span>
+        Reset Desktop
+      </button>
     </div>
   );
 }

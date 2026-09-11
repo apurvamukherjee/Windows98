@@ -1,9 +1,9 @@
 .menu {
   position: fixed;
-  left: 2px;
-  bottom: calc(var(--win98-taskbar-height) + var(--win98-safe-bottom));
-  z-index: 1001;
-  min-width: 160px;
+  top: 0;
+  left: 0;
+  z-index: 1002;
+  min-width: 140px;
   padding: 2px;
   background: var(--win98-face);
   border: 2px solid;
@@ -14,12 +14,10 @@
 }
 
 .item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  display: block;
   width: 100%;
-  padding: 6px 10px;
-  font-size: 13px;
+  padding: 4px 10px;
+  font-size: 12px;
   text-align: left;
   background: transparent;
   border: none;
@@ -31,9 +29,6 @@
   color: #ffffff;
 }
 
-.separator {
-  height: 1px;
-  margin: 2px 4px;
-  background: var(--win98-shadow);
-  border-bottom: 1px solid var(--win98-highlight);
+.item:disabled {
+  color: var(--win98-shadow);
 }

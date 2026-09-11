@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import type { FileType, FolderNode, FSNode } from '../fs/fsTypes';
+import { uniqueSiblingName } from '../fs/fsUtils';
 
 export const ROOT_ID = 'root';
 export const DESKTOP_ID = 'desktop';
@@ -30,6 +31,9 @@ interface FSStoreState {
   nextNodeSeq: number;
   createFile: (parentId: string, name: string, fileType: FileType, content: string) => string;
   updateFileContent: (id: string, content: string) => void;
+  createFolder: (parentId: string, name: string) => string;
+  renameNode: (id: string, name: string) => void;
+  moveNode: (id: string, newParentId: string) => void;
 }
 
 export const useFSStore = create<FSStoreState>((set, get) => ({
@@ -56,6 +60,50 @@ export const useFSStore = create<FSStoreState>((set, get) => ({
       if (node === undefined || node.kind !== 'file') return state;
       return {
         nodes: { ...state.nodes, [id]: { ...node, content, modifiedAt: Date.now() } },
+      };
+    }),
+
+  createFolder: (parentId, name) => {
+    const seq = get().nextNodeSeq;
+    const id = `folder-${seq}`;
+    const now = Date.now();
+    set((state) => ({
+      nodes: {
+        ...state.nodes,
+        [id]: {
+          id,
+          parentId,
+          name: uniqueSiblingName(state.nodes, parentId, name),
+          kind: 'folder',
+          createdAt: now,
+          modifiedAt: now,
+        },
+      },
+      nextNodeSeq: seq + 1,
+    }));
+    return id;
+  },
+
+  renameNode: (id, name) =>
+    set((state) => {
+      const node = state.nodes[id];
+      if (node === undefined || node.name === name) return state;
+      return { nodes: { ...state.nodes, [id]: { ...node, name, modifiedAt: Date.now() } } };
+    }),
+
+  moveNode: (id, newParentId) =>
+    set((state) => {
+      const node = state.nodes[id];
+      if (node === undefined || node.parentId === newParentId) return state;
+      // Refuse moving a folder into itself or one of its own descendants —
+      // otherwise the parent chain gains a cycle and getPathChain loops forever.
+      let ancestor: FSNode | undefined = state.nodes[newParentId];
+      while (ancestor !== undefined) {
+        if (ancestor.id === id) return state;
+        ancestor = ancestor.parentId === null ? undefined : state.nodes[ancestor.parentId];
+      }
+      return {
+        nodes: { ...state.nodes, [id]: { ...node, parentId: newParentId, modifiedAt: Date.now() } },
       };
     }),
 }));

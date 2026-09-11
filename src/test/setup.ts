@@ -21,3 +21,11 @@ if (typeof window.matchMedia !== 'function') {
     dispatchEvent: vi.fn(),
   }));
 }
+
+// jsdom does no layout at all, so it has no elementFromPoint either. Default
+// to "nothing there"; tests that care about drop-target resolution stub
+// their own return value with vi.spyOn (which requires the property to
+// already exist — hence defining it here rather than leaving it undefined).
+if (typeof document.elementFromPoint !== 'function') {
+  document.elementFromPoint = () => null;
+}

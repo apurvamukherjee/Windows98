@@ -1,0 +1,18 @@
+.desktop {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+}
+
+.rubberBand {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 5;
+  width: 0;
+  height: 0;
+  opacity: 0;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px dashed #ffffff;
+  pointer-events: none;
+}
