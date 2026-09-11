@@ -1,0 +1,32 @@
+.menu {
+  position: fixed;
+  left: 2px;
+  bottom: calc(var(--win98-taskbar-height) + var(--win98-safe-bottom));
+  z-index: 1001;
+  min-width: 160px;
+  padding: 2px;
+  background: var(--win98-face);
+  border: 2px solid;
+  border-color: var(--win98-light) var(--win98-dark-shadow) var(--win98-dark-shadow) var(--win98-light);
+  box-shadow:
+    inset 1px 1px 0 var(--win98-highlight),
+    inset -1px -1px 0 var(--win98-shadow);
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 10px;
+  font-size: 13px;
+  text-align: left;
+  background: transparent;
+  border: none;
+  cursor: default;
+}
+
+.item:hover {
+  background: var(--win98-title-active);
+  color: #ffffff;
+}

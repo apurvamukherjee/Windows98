@@ -2,6 +2,7 @@
   position: fixed;
   top: 0;
   left: 0;
+  z-index: 10;
   display: flex;
   flex-direction: column;
   background: var(--win98-face);
@@ -26,11 +27,38 @@
 }
 
 .title {
+  flex: 1;
   font-size: 12px;
   font-weight: bold;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.titlebarButtons {
+  display: flex;
+  gap: 2px;
+  flex: none;
+}
+
+.chromeButton {
+  width: 16px;
+  height: 14px;
+  padding: 0;
+  font-size: 10px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--win98-face);
+  border: 1px solid;
+  border-color: var(--win98-light) var(--win98-dark-shadow) var(--win98-dark-shadow) var(--win98-light);
+  color: #000000;
+  cursor: default;
+}
+
+.chromeButton:active {
+  border-color: var(--win98-dark-shadow) var(--win98-light) var(--win98-light) var(--win98-dark-shadow);
 }
 
 .content {

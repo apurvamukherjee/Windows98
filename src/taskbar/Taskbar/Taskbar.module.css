@@ -1,0 +1,48 @@
+.taskbar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: var(--win98-taskbar-height);
+  padding-bottom: var(--win98-safe-bottom);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding-left: 4px;
+  padding-right: 4px;
+  background: var(--win98-face);
+  border-top: 2px solid var(--win98-highlight);
+  z-index: 1000;
+}
+
+.startButton {
+  height: 22px;
+  padding: 0 10px;
+  font-size: 12px;
+  font-weight: bold;
+  background: var(--win98-face);
+  border: 1px solid;
+  border-color: var(--win98-light) var(--win98-dark-shadow) var(--win98-dark-shadow) var(--win98-light);
+  cursor: default;
+}
+
+.button {
+  height: 22px;
+  min-width: 120px;
+  max-width: 200px;
+  padding: 0 8px;
+  font-size: 12px;
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  background: var(--win98-face);
+  border: 1px solid;
+  border-color: var(--win98-light) var(--win98-dark-shadow) var(--win98-dark-shadow) var(--win98-light);
+  cursor: default;
+}
+
+.active {
+  border-color: var(--win98-dark-shadow) var(--win98-light) var(--win98-light) var(--win98-dark-shadow);
+  background: #d4d0c8;
+}

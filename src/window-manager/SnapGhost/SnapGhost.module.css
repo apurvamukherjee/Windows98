@@ -1,0 +1,12 @@
+.ghost {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 5;
+  border: 2px solid #1084d0;
+  background: rgba(16, 132, 208, 0.25);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 100ms ease-out;
+  will-change: transform, opacity;
+}

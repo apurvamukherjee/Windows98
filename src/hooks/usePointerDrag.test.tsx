@@ -33,11 +33,11 @@ describe('usePointerDrag', () => {
     fireEvent(window, new PointerEvent('pointermove', { clientX: 130, clientY: 90 }));
 
     expect(onDrag).toHaveBeenCalledTimes(1);
-    expect(onDrag).toHaveBeenCalledWith(30, -10);
+    expect(onDrag).toHaveBeenCalledWith(30, -10, 130, 90);
 
     fireEvent(window, new PointerEvent('pointerup', { clientX: 130, clientY: 90 }));
     expect(onDragEnd).toHaveBeenCalledTimes(1);
-    expect(onDragEnd).toHaveBeenCalledWith(30, -10);
+    expect(onDragEnd).toHaveBeenCalledWith(30, -10, 130, 90);
   });
 
   test('stops responding to move events after pointerup', () => {
@@ -61,7 +61,7 @@ describe('usePointerDrag', () => {
     fireEvent(window, new Event('blur'));
 
     expect(onDragEnd).toHaveBeenCalledTimes(1);
-    expect(onDragEnd).toHaveBeenCalledWith(40, 10);
+    expect(onDragEnd).toHaveBeenCalledWith(40, 10, 40, 10);
   });
 
   test('calls onDragStart exactly once per gesture', () => {

@@ -2,8 +2,8 @@ import { useCallback, useEffect, useRef } from 'react';
 
 export interface PointerDragHandlers {
   onDragStart?: () => void;
-  onDrag: (dx: number, dy: number) => void;
-  onDragEnd: (dx: number, dy: number) => void;
+  onDrag: (dx: number, dy: number, clientX: number, clientY: number) => void;
+  onDragEnd: (dx: number, dy: number, clientX: number, clientY: number) => void;
 }
 
 interface Point {
@@ -13,16 +13,19 @@ interface Point {
 
 /**
  * Drives a drag gesture entirely outside React state: onDrag fires at most
- * once per animation frame with the cumulative delta from drag start, so the
- * caller can write directly to a DOM node (e.g. via a ref) instead of
- * triggering a re-render on every pointermove. onDragEnd fires exactly once,
- * on release, cancellation, or the window losing focus mid-gesture — that's
- * the only point a caller should commit to React state.
+ * once per animation frame with the cumulative delta from drag start (plus
+ * the absolute pointer position, for edge/snap-zone checks), so the caller
+ * can write directly to a DOM node (e.g. via a ref) instead of triggering a
+ * re-render on every pointermove. onDragEnd fires exactly once, on release,
+ * cancellation, or the window losing focus mid-gesture — using the last
+ * known pointer position, since a blur event carries none of its own —
+ * that's the only point a caller should commit to React state.
  */
 export function usePointerDrag({ onDragStart, onDrag, onDragEnd }: PointerDragHandlers): {
   onPointerDown: (event: React.PointerEvent) => void;
 } {
   const startPoint = useRef<Point>({ x: 0, y: 0 });
+  const currentPoint = useRef<Point>({ x: 0, y: 0 });
   const delta = useRef<Point>({ x: 0, y: 0 });
   const rafId = useRef<number | null>(null);
   const endGesture = useRef<(() => void) | null>(null);
@@ -42,6 +45,7 @@ export function usePointerDrag({ onDragStart, onDrag, onDragEnd }: PointerDragHa
       }
 
       startPoint.current = { x: event.clientX, y: event.clientY };
+      currentPoint.current = { x: event.clientX, y: event.clientY };
       delta.current = { x: 0, y: 0 };
       onDragStart?.();
 
@@ -49,11 +53,12 @@ export function usePointerDrag({ onDragStart, onDrag, onDragEnd }: PointerDragHa
         if (rafId.current !== null) return;
         rafId.current = requestAnimationFrame(() => {
           rafId.current = null;
-          onDrag(delta.current.x, delta.current.y);
+          onDrag(delta.current.x, delta.current.y, currentPoint.current.x, currentPoint.current.y);
         });
       };
 
       const handleMove = (moveEvent: PointerEvent): void => {
+        currentPoint.current = { x: moveEvent.clientX, y: moveEvent.clientY };
         delta.current = {
           x: moveEvent.clientX - startPoint.current.x,
           y: moveEvent.clientY - startPoint.current.y,
@@ -63,7 +68,7 @@ export function usePointerDrag({ onDragStart, onDrag, onDragEnd }: PointerDragHa
 
       const finish = (): void => {
         cleanup();
-        onDragEnd(delta.current.x, delta.current.y);
+        onDragEnd(delta.current.x, delta.current.y, currentPoint.current.x, currentPoint.current.y);
       };
 
       function cleanup(): void {
